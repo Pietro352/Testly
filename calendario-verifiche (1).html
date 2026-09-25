@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Testly</title>
+<style>
+:root {
+  --bg: #F7F4EE;
+  --surface: #FFFFFF;
+  --ink: #2A2523;
+  --ink-soft: #6B625C;
+  --line: #E7E1D8;
+  --accent: #C2632B;
+  --accent-soft: #F1E3D6;
+  --scritto: #C2632B;
+  --orale: #3E6B5C;
+  --pratico: #3B5A8A;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(42,37,35,.06), 0 8px 24px rgba(42,37,35,.05);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+#app {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+}
+
+/* ---------- Header ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.topbar h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.classe-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.classe-picker select {
+  width: auto;
+  max-width: 220px;
+  padding: 8px 10px;
+  font-weight: 600;
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.classe-picker .icon-btn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--ink);
+}
+.classe-picker .icon-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 13px;
+}
+
+.pill.admin { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+.linklike {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+}
+
+/* ---------- Calendar ---------- */
+
+.calendar-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.cal-nav h2 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.cal-nav button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--ink);
+}
+.cal-nav button:hover { background: var(--accent-soft); border-color: var(--accent); }
+
+.weekdays, .days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.weekdays div {
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-soft);
+  padding-bottom: 6px;
+}
+
+.day {
+  position: relative;
+  min-height: 68px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 6px 6px 8px;
+  cursor: pointer;
+  background: #FBFAF7;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.day:hover { border-color: var(--accent); }
+.day.other-month { opacity: 0.35; cursor: default; }
+.day.other-month:hover { border-color: transparent; }
+.day.today { border-color: var(--ink-soft); }
+
+.day .num { font-size: 13px; color: var(--ink-soft); }
+
+.tag {
+  font-size: 10.5px;
+  border-radius: 6px;
+  padding: 2px 6px;
+  color: #fff;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tag.scritto { background: var(--scritto); }
+.tag.orale { background: var(--orale); }
+.tag.pratico { background: var(--pratico); }
+
+/* ---------- Legend ---------- */
+.legend { display: flex; gap: 16px; margin-top: 16px; font-size: 13px; color: var(--ink-soft); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.dot.scritto { background: var(--scritto); }
+.dot.orale { background: var(--orale); }
+.dot.pratico { background: var(--pratico); }
+
+/* ---------- Modal ---------- */
+
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(42,37,35,.35);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  z-index: 50;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.modal h3 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+.modal .sub { color: var(--ink-soft); font-size: 13px; margin-bottom: 16px; }
+
+label { display: block; font-size: 13px; color: var(--ink-soft); margin: 12px 0 5px; }
+input[type=text], input[type=password], input[type=number], select, textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--ink);
+  background: #FDFCFA;
+}
+textarea { resize: vertical; min-height: 60px; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.seg { display: flex; gap: 8px; margin-top: 4px; }
+.seg button {
+  flex: 1;
+  border: 1px solid var(--line);
+  background: #FDFCFA;
+  border-radius: 10px;
+  padding: 9px 6px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--ink);
+}
+.seg button.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+.btn.danger { background: #a33; }
+
+.row { display: flex; gap: 10px; margin-top: 18px; }
+.row .btn { flex: 1; }
+
+.tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+.tabs button {
+  flex: 1; padding: 8px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--surface); cursor: pointer; font-size: 13px; color: var(--ink-soft);
+}
+.tabs button.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); font-weight: 600; }
+
+.detail-block {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.detail-block .tipo-badge {
+  display: inline-block; font-size: 11px; color: #fff; border-radius: 6px; padding: 2px 8px; margin-bottom: 6px;
+}
+.detail-block h4 { margin: 0 0 2px; font-size: 15px; }
+.detail-block p.desc { margin: 6px 0 0; font-size: 13.5px; color: var(--ink-soft); }
+.avg { font-size: 13px; margin-top: 10px; color: var(--ink-soft); }
+.avg b { color: var(--ink); }
+
+.voto-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 4px; }
+.voto-grid button {
+  border: 1px solid var(--line); background: #FDFCFA; border-radius: 8px; padding: 7px 0;
+  font-size: 12.5px; cursor: pointer; color: var(--ink);
+}
+.voto-grid button.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+
+.hint { font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
+.error { font-size: 13px; color: #a33; margin-top: 8px; }
+
+.close-x {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink-soft);
+}
+.modal { position: relative; }
+
+.id-box {
+  background: var(--accent-soft);
+  border: 1px dashed var(--accent);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 10px;
+}
+.id-box code { font-size: 16px; font-weight: 700; letter-spacing: .04em; }
+
+.empty { text-align: center; color: var(--ink-soft); font-size: 13.5px; padding: 20px 0; }
+
+@media (max-width: 480px) {
+  .day { min-height: 58px; }
+  .modal { padding: 18px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <p style="text-align:center;color:#6B625C;padding:40px 0">Caricamento…</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/appwrite@19.0.0"></script>
+<script>
+// ============================================================
+// CONFIGURAZIONE APPWRITE
+// Compila questi valori con quelli del tuo progetto Appwrite.
+// Vedi README.md per la guida passo-passo alla creazione del database.
+// ============================================================
+window.APPWRITE_CONFIG = {
+  endpoint: "https://cloud.appwrite.io/v1",   // endpoint del tuo progetto Appwrite
+  projectId: "INSERISCI_PROJECT_ID",          // Project ID (Settings > Project ID)
+
+  databaseId: "INSERISCI_DATABASE_ID",        // ID del database creato per l'app
+
+  // ID delle collection (vedi README per gli attributi richiesti)
+  collections: {
+    classi: "classi",       // le classi tra cui scegliere in alto a sinistra
+    verifiche: "verifiche", // le verifiche inserite nel calendario
+    voti: "voti"            // i feedback/voti lasciati sulle verifiche
+  }
+};
+</script>
+<script>
+// ============================================================
+// Calendario Verifiche — logica app (versione semplice, senza login)
+// ============================================================
+
+const CFG = window.APPWRITE_CONFIG;
+const { Client, Databases, ID, Query } = window.Appwrite;
+
+const client = new Client().setEndpoint(CFG.endpoint).setProject(CFG.projectId);
+const db = new Databases(client);
+const COL = CFG.collections;
+
+const MESI = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+const GIORNI = ["lun","mar","mer","gio","ven","sab","dom"];
+const TIPI = { scritto: "Scritto", orale: "Orale", pratico: "Pratico" };
+const VOTI_POSSIBILI = [];
+for (let v = 4; v <= 10; v += 0.25) VOTI_POSSIBILI.push(Math.round(v * 100) / 100);
+
+const LS_DEVICE = "verifiche_app_device_id";
+const LS_CLASSE = "verifiche_app_ultima_classe";
+const root = document.getElementById("app");
+
+function deviceId() {
+  let id = localStorage.getItem(LS_DEVICE);
+  if (!id) { id = "d_" + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem(LS_DEVICE, id); }
+  return id;
+}
+
+let state = {
+  view: new Date(),
+  classi: [],
+  classeId: localStorage.getItem(LS_CLASSE) || null,
+  verificheMese: []
+};
+
+function fmtDate(d) {
+  const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+// ============================================================
+// RENDER PRINCIPALE
+// ============================================================
+
+async function render() {
+  root.innerHTML = `<p style="text-align:center;color:#6B625C;padding:40px 0">Caricamento…</p>`;
+
+  if (state.classi.length === 0) {
+    try {
+      const res = await db.listDocuments(CFG.databaseId, COL.classi, [Query.limit(100), Query.orderAsc("nome")]);
+      state.classi = res.documents;
+    } catch (e) {
+      root.innerHTML = `<p style="text-align:center;color:#a33;padding:40px 0">Impossibile contattare Appwrite. Controlla config.js.</p>`;
+      return;
+    }
+  }
+
+  if (!state.classeId || !state.classi.find(c => c.$id === state.classeId)) {
+    state.classeId = state.classi[0]?.$id || null;
+  }
+  if (state.classeId) localStorage.setItem(LS_CLASSE, state.classeId);
+
+  root.innerHTML = "";
+
+  if (!state.classeId) {
+    root.appendChild(renderNessunaClasse());
+    return;
+  }
+
+  root.appendChild(renderTopbar());
+  const calCard = el("div", "calendar-card");
+  calCard.appendChild(renderCalNav());
+  const weekdays = el("div", "weekdays");
+  GIORNI.forEach(g => { const d = el("div", ""); d.textContent = g; weekdays.appendChild(d); });
+  calCard.appendChild(weekdays);
+  const daysGrid = el("div", "days");
+  calCard.appendChild(daysGrid);
+  const legend = el("div", "legend");
+  legend.innerHTML = `
+    <span><span class="dot scritto"></span>Scritto</span>
+    <span><span class="dot orale"></span>Orale</span>
+    <span><span class="dot pratico"></span>Pratico</span>
+  `;
+  calCard.appendChild(legend);
+  root.appendChild(calCard);
+
+  await caricaVerificheMese();
+  disegnaGiorni(daysGrid);
+}
+
+function renderNessunaClasse() {
+  const wrap = el("div", "");
+  wrap.style.maxWidth = "380px";
+  wrap.style.margin = "60px auto";
+  const card = el("div", "calendar-card");
+  card.innerHTML = `
+    <h3 style="margin-top:0">Testly</h3>
+    <p class="sub">Non esiste ancora nessuna classe. Creane una per iniziare.</p>
+    <label>Nome classe</label>
+    <input type="text" id="nome-classe-init" placeholder="es. 3B Meccanica" />
+    <div class="error" id="err-init" style="display:none"></div>
+    <div class="row"><button class="btn" id="crea-init" style="width:100%">Crea classe</button></div>
+  `;
+  wrap.appendChild(card);
+  card.querySelector("#crea-init").addEventListener("click", async () => {
+    const nome = card.querySelector("#nome-classe-init").value.trim();
+    const err = card.querySelector("#err-init");
+    if (!nome) { err.textContent = "Inserisci un nome."; err.style.display = ""; return; }
+    try {
+      const doc = await db.createDocument(CFG.databaseId, COL.classi, ID.unique(), { nome });
+      state.classi = [];
+      state.classeId = doc.$id;
+      render();
+    } catch (e) {
+      err.textContent = "Errore nella creazione della classe.";
+      err.style.display = "";
+    }
+  });
+  return wrap;
+}
+
+function renderTopbar() {
+  const top = el("div", "topbar");
+
+  const left = el("div", "classe-picker");
+  const select = el("select", "");
+  state.classi.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.$id; opt.textContent = c.nome;
+    if (c.$id === state.classeId) opt.selected = true;
+    select.appendChild(opt);
+  });
+  select.addEventListener("change", () => {
+    state.classeId = select.value;
+    localStorage.setItem(LS_CLASSE, state.classeId);
+    render();
+  });
+  const addBtn = el("button", "icon-btn");
+  addBtn.title = "Nuova classe";
+  addBtn.textContent = "+";
+  addBtn.addEventListener("click", apriModalNuovaClasse);
+  left.appendChild(select);
+  left.appendChild(addBtn);
+
+  const h1 = el("h1", "");
+  h1.textContent = "Testly";
+
+  top.appendChild(left);
+  top.appendChild(h1);
+  return top;
+}
+
+function renderCalNav() {
+  const nav = el("div", "cal-nav");
+  nav.innerHTML = `
+    <button id="prev-month">‹</button>
+    <h2>${MESI[state.view.getMonth()]} ${state.view.getFullYear()}</h2>
+    <button id="next-month">›</button>
+  `;
+  nav.querySelector("#prev-month").addEventListener("click", () => {
+    state.view = new Date(state.view.getFullYear(), state.view.getMonth() - 1, 1);
+    render();
+  });
+  nav.querySelector("#next-month").addEventListener("click", () => {
+    state.view = new Date(state.view.getFullYear(), state.view.getMonth() + 1, 1);
+    render();
+  });
+  return nav;
+}
+
+async function caricaVerificheMese() {
+  const y = state.view.getFullYear(), m = state.view.getMonth();
+  const first = fmtDate(new Date(y, m, 1));
+  const last = fmtDate(new Date(y, m + 1, 0));
+  try {
+    const res = await db.listDocuments(CFG.databaseId, COL.verifiche, [
+      Query.equal("classeId", state.classeId),
+      Query.greaterThanEqual("data", first),
+      Query.lessThanEqual("data", last),
+      Query.limit(200)
+    ]);
+    state.verificheMese = res.documents;
+  } catch (e) {
+    state.verificheMese = [];
+  }
+}
+
+function disegnaGiorni(grid) {
+  grid.innerHTML = "";
+  const y = state.view.getFullYear(), m = state.view.getMonth();
+  const first = new Date(y, m, 1);
+  const startOffset = (first.getDay() + 6) % 7; // lunedì = 0
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const daysInPrevMonth = new Date(y, m, 0).getDate();
+  const oggi = fmtDate(new Date());
+
+  const cells = [];
+  for (let i = startOffset - 1; i >= 0; i--) cells.push({ day: daysInPrevMonth - i, other: true });
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d, other: false });
+  while (cells.length % 7 !== 0) cells.push({ day: cells.length, other: true });
+
+  cells.forEach(c => {
+    const cell = el("div", "day" + (c.other ? " other-month" : ""));
+    if (!c.other) {
+      const dateStr = fmtDate(new Date(y, m, c.day));
+      if (dateStr === oggi) cell.classList.add("today");
+      const num = el("div", "num"); num.textContent = c.day;
+      cell.appendChild(num);
+
+      const verificheGiorno = state.verificheMese.filter(v => v.data === dateStr);
+      verificheGiorno.slice(0, 3).forEach(v => {
+        const tag = el("div", "tag " + v.tipo);
+        tag.textContent = `${TIPI[v.tipo]} · ${v.materia}`;
+        cell.appendChild(tag);
+      });
+
+      cell.addEventListener("click", () => {
+        if (verificheGiorno.length > 0) apriModalDettaglio(dateStr, verificheGiorno);
+        else apriModalNuovaVerifica(dateStr);
+      });
+    }
+    grid.appendChild(cell);
+  });
+}
+
+// ------------------------------------------------------------
+// MODALE: nuova classe
+// ------------------------------------------------------------
+
+function apriModalNuovaClasse() {
+  const { overlay, modal } = baseModal();
+  modal.innerHTML = closeBtnHtml() + `
+    <h3>Nuova classe</h3>
+    <label>Nome classe</label>
+    <input type="text" id="nome-classe" placeholder="es. 3B Meccanica" />
+    <div class="error" id="nc-error" style="display:none"></div>
+    <div class="row"><button class="btn" id="crea-classe-btn" style="width:100%">Crea</button></div>
+  `;
+  bindClose(overlay, modal);
+  modal.querySelector("#crea-classe-btn").addEventListener("click", async () => {
+    const nome = modal.querySelector("#nome-classe").value.trim();
+    const err = modal.querySelector("#nc-error");
+    if (!nome) { err.textContent = "Inserisci un nome."; err.style.display = ""; return; }
+    try {
+      const doc = await db.createDocument(CFG.databaseId, COL.classi, ID.unique(), { nome });
+      state.classi = [];
+      state.classeId = doc.$id;
+      closeModal(overlay);
+      render();
+    } catch (e) {
+      err.textContent = "Errore nella creazione della classe.";
+      err.style.display = "";
+    }
+  });
+}
+
+// ------------------------------------------------------------
+// MODALE: nuova verifica
+// ------------------------------------------------------------
+
+function apriModalNuovaVerifica(dateStr) {
+  const { overlay, modal } = baseModal();
+  let tipo = "scritto";
+  modal.innerHTML = closeBtnHtml() + `
+    <h3>Aggiungi verifica</h3>
+    <p class="sub">${dataLeggibile(dateStr)}</p>
+    <label>Tipo</label>
+    <div class="seg" id="tipo-seg">
+      <button type="button" data-tipo="scritto" class="active">Scritto</button>
+      <button type="button" data-tipo="orale">Orale</button>
+      <button type="button" data-tipo="pratico">Pratico</button>
+    </div>
+    <label>Materia</label>
+    <input type="text" id="materia" placeholder="es. Matematica" />
+    <label>Descrizione (facoltativa)</label>
+    <textarea id="descrizione" placeholder="Argomenti, capitoli, note..."></textarea>
+    <div class="error" id="nv-error" style="display:none"></div>
+    <div class="row">
+      <button class="btn secondary" id="annulla-btn">Annulla</button>
+      <button class="btn" id="salva-btn">Salva</button>
+    </div>
+  `;
+  bindClose(overlay, modal);
+  modal.querySelectorAll("#tipo-seg button").forEach(b => {
+    b.addEventListener("click", () => {
+      tipo = b.dataset.tipo;
+      modal.querySelectorAll("#tipo-seg button").forEach(x => x.classList.toggle("active", x.dataset.tipo === tipo));
+    });
+  });
+  modal.querySelector("#annulla-btn").addEventListener("click", () => closeModal(overlay));
+  modal.querySelector("#salva-btn").addEventListener("click", async () => {
+    const materia = modal.querySelector("#materia").value.trim();
+    const descrizione = modal.querySelector("#descrizione").value.trim();
+    const err = modal.querySelector("#nv-error");
+    if (!materia) { err.textContent = "Inserisci la materia."; err.style.display = ""; return; }
+    try {
+      await db.createDocument(CFG.databaseId, COL.verifiche, ID.unique(), {
+        classeId: state.classeId, data: dateStr, tipo, materia, descrizione
+      });
+      closeModal(overlay);
+      render();
+    } catch (e) {
+      err.textContent = "Errore nel salvataggio.";
+      err.style.display = "";
+    }
+  });
+}
+
+// ------------------------------------------------------------
+// MODALE: dettaglio giorno / feedback
+// ------------------------------------------------------------
+
+function dataLeggibile(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  const giorni = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
+  return `${giorni[dt.getDay()]} ${d} ${MESI[m - 1]} ${y}`;
+}
+
+function feedbackDisponibile(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const soglia = new Date(y, m - 1, d, 13, 0, 0);
+  return new Date() >= soglia;
+}
+
+async function apriModalDettaglio(dateStr, verifiche) {
+  const { overlay, modal } = baseModal();
+  modal.innerHTML = closeBtnHtml() + `
+    <h3>${dataLeggibile(dateStr)}</h3>
+    <div id="lista-verifiche"></div>
+  `;
+  bindClose(overlay, modal);
+  const lista = modal.querySelector("#lista-verifiche");
+
+  for (const v of verifiche) {
+    const block = el("div", "detail-block");
+    block.innerHTML = `
+      <span class="tipo-badge ${v.tipo}" style="background:var(--${v.tipo})">${TIPI[v.tipo]}</span>
+      <button class="linklike" style="float:right;color:#a33" data-del="${v.$id}">elimina</button>
+      <h4>${escapeHtml(v.materia)}</h4>
+      ${v.descrizione ? `<p class="desc">${escapeHtml(v.descrizione)}</p>` : ""}
+      <div id="fb-${v.$id}"></div>
+    `;
+    lista.appendChild(block);
+
+    block.querySelector(`[data-del="${v.$id}"]`).addEventListener("click", async () => {
+      if (!confirm("Eliminare questa verifica?")) return;
+      try {
+        await db.deleteDocument(CFG.databaseId, COL.verifiche, v.$id);
+        closeModal(overlay);
+        render();
+      } catch {}
+    });
+
+    const fbBox = block.querySelector(`#fb-${v.$id}`);
+    if (!feedbackDisponibile(dateStr)) {
+      fbBox.innerHTML = `<p class="hint">Il feedback sarà disponibile dopo le 13:00 del giorno della verifica.</p>`;
+      continue;
+    }
+    renderFeedbackBox(fbBox, v);
+  }
+}
+
+async function renderFeedbackBox(box, verifica) {
+  box.innerHTML = `<p class="hint">Caricamento...</p>`;
+  let voti = [];
+  try {
+    const res = await db.listDocuments(CFG.databaseId, COL.voti, [
+      Query.equal("verificaId", verifica.$id), Query.limit(500)
+    ]);
+    voti = res.documents;
+  } catch {}
+
+  const media = voti.length ? (voti.reduce((s, x) => s + x.voto, 0) / voti.length) : null;
+  const mediaTxt = media !== null ? media.toFixed(2) : "—";
+
+  const mioVotoId = `${verifica.$id}__${deviceId()}`;
+  const mioVoto = voti.find(v => v.$id === mioVotoId);
+
+  box.innerHTML = `
+    <p class="avg">Media della classe: <b>${mediaTxt}</b> (${voti.length} voto${voti.length === 1 ? "" : "i"})</p>
+    ${mioVoto
+      ? `<p class="hint">Hai già lasciato un feedback per questa verifica: <b>${mioVoto.voto}</b></p>`
+      : `<label>Lascia il tuo voto</label><div class="voto-grid" id="voto-grid-${verifica.$id}"></div>`
+    }
+    <div class="error" id="fb-error-${verifica.$id}" style="display:none"></div>
+  `;
+
+  if (!mioVoto) {
+    const grid = box.querySelector(`#voto-grid-${verifica.$id}`);
+    VOTI_POSSIBILI.forEach(v => {
+      const b = el("button", "");
+      b.type = "button";
+      b.textContent = v;
+      b.addEventListener("click", async () => {
+        grid.querySelectorAll("button").forEach(x => x.classList.toggle("active", x === b));
+        try {
+          await db.createDocument(CFG.databaseId, COL.voti, mioVotoId, {
+            verificaId: verifica.$id, voto: v
+          });
+          renderFeedbackBox(box, verifica);
+        } catch (e) {
+          const err = box.querySelector(`#fb-error-${verifica.$id}`);
+          err.textContent = "Hai già votato oppure si è verificato un errore.";
+          err.style.display = "";
+        }
+      });
+      grid.appendChild(b);
+    });
+  }
+}
+
+// ------------------------------------------------------------
+// UTIL
+// ------------------------------------------------------------
+
+function el(tag, cls) { const e = document.createElement(tag); if (cls) e.className = cls; return e; }
+function escapeHtml(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+function baseModal() {
+  const overlay = el("div", "overlay");
+  const modal = el("div", "modal");
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  return { overlay, modal };
+}
+function closeBtnHtml() { return `<button class="close-x" id="close-modal">×</button>`; }
+function bindClose(overlay, modal) {
+  modal.querySelector("#close-modal").addEventListener("click", () => closeModal(overlay));
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(overlay); });
+}
+function closeModal(overlay) { document.body.removeChild(overlay); }
+
+// ============================================================
+// AVVIO
+// ============================================================
+render();
+</script>
+</body>
+</html>
