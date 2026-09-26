@@ -31,12 +31,16 @@ html, body {
   font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   font-size: 16px;
   line-height: 1.45;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 #app {
   max-width: 880px;
+  width: 100%;
   margin: 0 auto;
   padding: 28px 20px 80px;
+  overflow-x: hidden;
 }
 
 /* ---------- Header ---------- */
@@ -65,10 +69,12 @@ html, body {
   gap: 8px;
   justify-self: start;
   min-width: 0;
+  overflow: hidden;
 }
 .classe-picker select {
   width: auto;
   max-width: 220px;
+  min-width: 0;
   padding: 8px 10px;
   font-weight: 600;
   color: var(--accent);
@@ -92,6 +98,8 @@ html, body {
   align-items: center;
   justify-content: flex-end;
   justify-self: end;
+  min-width: 0;
+  overflow: hidden;
   gap: 10px;
   font-size: 13px;
   color: var(--ink-soft);
@@ -158,8 +166,9 @@ html, body {
 
 .weekdays, .days {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 6px;
+  width: 100%;
 }
 
 .weekdays div {
@@ -167,11 +176,14 @@ html, body {
   font-size: 12px;
   color: var(--ink-soft);
   padding-bottom: 6px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .day {
   position: relative;
   min-height: 68px;
+  min-width: 0;
   border-radius: 10px;
   border: 1px solid transparent;
   padding: 6px 6px 8px;
@@ -180,6 +192,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow: hidden;
 }
 .day:hover { border-color: var(--accent); }
 .day.other-month { opacity: 0.35; cursor: default; }
@@ -197,6 +210,8 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+  min-width: 0;
 }
 .tag.scritto { background: var(--scritto); }
 .tag.orale { background: var(--orale); }
