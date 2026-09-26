@@ -42,12 +42,11 @@ html, body {
 /* ---------- Header ---------- */
 
 .topbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 22px;
-  flex-wrap: wrap;
 }
 
 .topbar h1 {
@@ -55,12 +54,17 @@ html, body {
   font-weight: 600;
   margin: 0;
   letter-spacing: -0.01em;
+  text-align: center;
+  justify-self: center;
+  cursor: default;
 }
 
 .classe-picker {
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-self: start;
+  min-width: 0;
 }
 .classe-picker select {
   width: auto;
@@ -86,6 +90,8 @@ html, body {
 .admin-box {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
   gap: 10px;
   font-size: 13px;
   color: var(--ink-soft);
@@ -195,6 +201,21 @@ html, body {
 .tag.scritto { background: var(--scritto); }
 .tag.orale { background: var(--orale); }
 .tag.pratico { background: var(--pratico); }
+
+.day-count {
+  align-self: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
 
 /* ---------- Legend ---------- */
 .legend { display: flex; gap: 16px; margin-top: 16px; font-size: 13px; color: var(--ink-soft); }
@@ -323,6 +344,75 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 
 .empty { text-align: center; color: var(--ink-soft); font-size: 13.5px; padding: 20px 0; }
 
+.icon-btn-inline {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+.icon-btn-inline:hover { background: var(--accent-soft); }
+
+/* ---------- AI summary card ---------- */
+.ai-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  margin-top: 16px;
+}
+.ai-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+.ai-card-head h3 {
+  font-size: 14.5px;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+}
+.ai-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+.ai-refresh {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  white-space: nowrap;
+}
+.ai-refresh:disabled { opacity: .5; cursor: default; text-decoration: none; }
+.ai-text {
+  font-size: 13.5px;
+  color: var(--ink);
+  line-height: 1.55;
+  margin: 0;
+  white-space: pre-line;
+}
+.ai-text.loading, .ai-text.empty {
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
 @media (max-width: 480px) {
   .day { min-height: 58px; }
   .modal { padding: 18px; }
@@ -347,6 +437,15 @@ window.APPWRITE_CONFIG = {
   },
   adminPassword: "143445"
 };
+
+// Configurazione micro-AI (riepilogo verifiche via Groq).
+// ATTENZIONE: questo file gira su GitHub Pages (statico), quindi la chiave
+// qui sotto è visibile a chiunque apra il sorgente della pagina.
+// Usa una chiave dedicata a questo progetto con permessi/limiti minimi.
+window.GROQ_CONFIG = {
+  apiKey: "INSERISCI_QUI_LA_TUA_GROQ_API_KEY",
+  model: "openai/gpt-oss-20b"
+};
 </script>
 <script>
 // ============================================================
@@ -361,7 +460,7 @@ const db = new Databases(client);
 const COL = CFG.collections;
 
 const MESI = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
-const GIORNI = ["lun","mar","mer","gio","ven","sab","dom"];
+const GIORNI = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
 const TIPI = { scritto: "Scritto", orale: "Orale", pratico: "Pratico" };
 const VOTI_POSSIBILI = [];
 for (let v = 4; v <= 10; v += 0.25) VOTI_POSSIBILI.push(Math.round(v * 100) / 100);
@@ -455,9 +554,11 @@ async function render() {
   `;
   calCard.appendChild(legend);
   root.appendChild(calCard);
+  root.appendChild(renderAiCard());
 
   await caricaVerificheMese();
   disegnaGiorni(daysGrid);
+  aggiornaRiepilogoAI(false);
 }
 
 function renderNessunaClasse() {
@@ -540,7 +641,7 @@ function renderTopbar() {
     const badge = el("span", "pill admin");
     badge.textContent = "Amministratore";
     const esci = el("button", "linklike");
-    esci.textContent = "esci";
+    esci.textContent = "Esci";
     esci.addEventListener("click", () => {
       localStorage.removeItem(LS_ADMIN);
       state.isAdmin = false;
@@ -591,6 +692,123 @@ async function caricaVerificheMese() {
   }
 }
 
+// ------------------------------------------------------------
+// MICRO-AI: riepilogo prossime verifiche (Groq)
+// ------------------------------------------------------------
+
+function renderAiCard() {
+  const card = el("div", "ai-card");
+  card.innerHTML = `
+    <div class="ai-card-head">
+      <h3>✨ Riepilogo AI <span class="ai-badge">beta</span></h3>
+      <button class="ai-refresh" id="ai-refresh-btn">Rigenera</button>
+    </div>
+    <p class="ai-text loading" id="ai-text">Caricamento...</p>
+  `;
+  card.querySelector("#ai-refresh-btn").addEventListener("click", (e) => {
+    e.target.disabled = true;
+    aggiornaRiepilogoAI(true).finally(() => { e.target.disabled = false; });
+  });
+  return card;
+}
+
+async function caricaProssimeVerifiche(limite = 8) {
+  const oggi = fmtDate(new Date());
+  try {
+    const res = await db.listDocuments(CFG.databaseId, COL.verifiche, [
+      Query.equal("classeId", state.classeId),
+      Query.greaterThanEqual("data", oggi),
+      Query.orderAsc("data"),
+      Query.limit(limite)
+    ]);
+    return res.documents;
+  } catch (e) {
+    return [];
+  }
+}
+
+function hashListaVerifiche(list) {
+  return cyrb53(list.map(v => `${v.$id}:${v.data}:${v.tipo}:${v.materia}`).join("|")).toString(36);
+}
+
+async function aggiornaRiepilogoAI(forza) {
+  const box = document.getElementById("ai-text");
+  if (!box) return;
+
+  const chiave = window.GROQ_CONFIG?.apiKey || "";
+  if (!chiave || chiave.startsWith("INSERISCI_QUI")) {
+    box.className = "ai-text empty";
+    box.textContent = "Riepilogo AI non configurato: imposta GROQ_CONFIG.apiKey nel file.";
+    return;
+  }
+
+  const verifiche = await caricaProssimeVerifiche();
+  if (verifiche.length === 0) {
+    box.className = "ai-text empty";
+    box.textContent = "Nessuna verifica in programma al momento.";
+    return;
+  }
+
+  const hash = hashListaVerifiche(verifiche);
+  const cacheKey = `verifiche_app_ai_cache_${state.classeId}`;
+
+  if (!forza) {
+    try {
+      const cache = JSON.parse(localStorage.getItem(cacheKey) || "null");
+      if (cache && cache.hash === hash) {
+        box.className = "ai-text";
+        box.textContent = cache.testo;
+        return;
+      }
+    } catch (e) {}
+  }
+
+  box.className = "ai-text loading";
+  box.textContent = "Genero il riepilogo...";
+
+  try {
+    const testo = await chiediRiepilogoGroq(verifiche);
+    box.className = "ai-text";
+    box.textContent = testo;
+    localStorage.setItem(cacheKey, JSON.stringify({ hash, testo }));
+  } catch (e) {
+    box.className = "ai-text empty";
+    box.textContent = "Riepilogo AI non disponibile al momento.";
+  }
+}
+
+async function chiediRiepilogoGroq(verifiche) {
+  const elenco = verifiche.map(v =>
+    `- ${dataLeggibile(v.data)}: ${TIPI[v.tipo]} di ${v.materia}${v.descrizione ? " (" + v.descrizione + ")" : ""}`
+  ).join("\n");
+
+  const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${window.GROQ_CONFIG.apiKey}`
+    },
+    body: JSON.stringify({
+      model: window.GROQ_CONFIG.model,
+      messages: [
+        {
+          role: "system",
+          content: "Sei l'assistente di Testly, un calendario di verifiche scolastiche per studenti. Riassumi in italiano, massimo 3 frasi brevi, tono amichevole e diretto, le prossime verifiche indicate dall'utente. Metti in evidenza quella più vicina nel tempo. Non usare markdown, elenchi puntati o asterischi: solo testo semplice."
+        },
+        { role: "user", content: `Prossime verifiche:\n${elenco}` }
+      ],
+      temperature: 0.4,
+      max_tokens: 200
+    })
+  });
+
+  if (!resp.ok) throw new Error("Errore API Groq: " + resp.status);
+  const data = await resp.json();
+  const testo = data?.choices?.[0]?.message?.content?.trim();
+  if (!testo) throw new Error("Risposta Groq vuota");
+  return testo;
+}
+
 function disegnaGiorni(grid) {
   grid.innerHTML = "";
   const y = state.view.getFullYear(), m = state.view.getMonth();
@@ -614,11 +832,17 @@ function disegnaGiorni(grid) {
       cell.appendChild(num);
 
       const verificheGiorno = state.verificheMese.filter(v => v.data === dateStr);
-      verificheGiorno.slice(0, 3).forEach(v => {
+      if (verificheGiorno.length === 1) {
+        const v = verificheGiorno[0];
         const tag = el("div", "tag " + v.tipo);
         tag.textContent = `${TIPI[v.tipo]} · ${v.materia}`;
         cell.appendChild(tag);
-      });
+      } else if (verificheGiorno.length > 1) {
+        const badge = el("div", "day-count");
+        badge.textContent = verificheGiorno.length;
+        badge.title = `${verificheGiorno.length} verifiche`;
+        cell.appendChild(badge);
+      }
 
       cell.addEventListener("click", () => {
         if (verificheGiorno.length > 0) apriModalDettaglio(dateStr, verificheGiorno);
@@ -754,11 +978,13 @@ function apriModalNuovaVerifica(dateStr, verificaEsistente) {
 // MODALE: dettaglio giorno / feedback
 // ------------------------------------------------------------
 
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
 function dataLeggibile(dateStr) {
   const [y, m, d] = dateStr.split("-").map(Number);
   const dt = new Date(y, m - 1, d);
   const giorni = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
-  return `${giorni[dt.getDay()]} ${d} ${MESI[m - 1]} ${y}`;
+  return cap(`${giorni[dt.getDay()]} ${d} ${MESI[m - 1]} ${y}`);
 }
 
 function feedbackDisponibile(dateStr) {
@@ -781,8 +1007,8 @@ async function apriModalDettaglio(dateStr, verifiche) {
     block.innerHTML = `
       <span class="tipo-badge ${v.tipo}" style="background:var(--${v.tipo})">${TIPI[v.tipo]}</span>
       ${state.isAdmin ? `
-        <button class="linklike" style="float:right;color:#a33;margin-left:10px" data-del="${v.$id}">elimina</button>
-        <button class="linklike" style="float:right" data-edit="${v.$id}">modifica</button>
+        <button class="icon-btn-inline" style="float:right;margin-left:4px" data-del="${v.$id}" title="Elimina" aria-label="Elimina">🗑️</button>
+        <button class="icon-btn-inline" style="float:right" data-edit="${v.$id}" title="Modifica" aria-label="Modifica">✏️</button>
       ` : ""}
       <h4>${escapeHtml(v.materia)}</h4>
       ${v.descrizione ? `<p class="desc">${escapeHtml(v.descrizione)}</p>` : ""}
