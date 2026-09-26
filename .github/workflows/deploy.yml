@@ -31,7 +31,7 @@ jobs:
           if [ -z "$GROQ_KEY" ]; then
             echo "⚠️  Secret GROQ_API_KEY non configurato: AI disabilitata"
           else
-            sed -i "s|groqApiKey: \"\"|groqApiKey: \"$GROQ_KEY\"|g" index.html
+            sed -i "s|__GROQ_API_KEY__|$GROQ_KEY|g" index.html
             echo "✓ API key Groq iniettata nel file index.html"
           fi
 
